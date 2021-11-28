@@ -77,6 +77,22 @@ cd container
 gcloud builds submit
 ```
 
+9. Finally, use terraform to create the cloud function and upload the code that will be the basis of our slackbot:
+
+```
+cd code
+terraform init
+terraform apply
+```
+(Note that sometimes enabling the cloudfunctions api takes a bit and may error out the first time you attempt to create the function..retry in a bit.)
+
+Next transfer this terraform state to your cloud repo by editing the backend.tf file in the code dir, setting the project name and:
+
+```
+terraform init -force-copy
+```
+
+
 ## CICD Container
 
 The Docker container used for CICD executions is inspired by the
