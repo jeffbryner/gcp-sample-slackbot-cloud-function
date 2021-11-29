@@ -92,6 +92,24 @@ Next transfer this terraform state to your cloud repo by editing the backend.tf 
 terraform init -force-copy
 ```
 
+## Secrets
+According to https://github.com/hashicorp/terraform-provider-google/issues/9946 there is no way to use terraform to reference secrets stored in google secret manager and pass them to the function.
+
+As delivered here, the variables you set for slack_bot_token and slack_signing_secret are stored as secrets in secret manager, but they are exposed as plain text environment variables to the function.
+
+This means they are visible to anyone who can see the function configuration.
+
+If you'd like to prevent this visibility, you can forgo using terraform to connect secrets to the function and do it manually via the console.
+
+Navigate to your function:
+- Choose Edit
+- Under runtime, build, connections and security settings choose security
+- Using the UI, expose slack_bot_token (latest) as environment variable SLACK_BOT_TOKEN and slack_signing_secret (latest) as environment variable SLACK_SIGNING_SECRET
+- Choose next and redeploy the function
+
+Finally, remove the environment variables section from the terraform script main.tf in the resource "google_cloudfunctions_function" "project_function" section.
+
+Terraform apply will redeploy the function, but it will be able to access secrets using your manual configuration.
 
 ## CICD Container
 
