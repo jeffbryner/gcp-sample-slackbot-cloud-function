@@ -133,3 +133,12 @@ You can learn more about the build triggers, etc at:
 
 as this project uses the same triggers.
 
+## Resources:
+
+- https://www.sethvargo.com/managing-google-secret-manager-secrets-with-terraform/
+- https://api.slack.com/start/building/bolt-python
+- https://github.com/slackapi/bolt-python/blob/main/examples/google_cloud_functions/main.py
+- https://github.com/slackapi/bolt-python
+- https://api.slack.com/apis/connections/events-api
+- https://api.slack.com/tutorials/tracks/responding-to-app-mentions
+- https://slack.dev/bolt-python/tutorial/getting-started-http
