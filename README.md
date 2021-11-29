@@ -79,18 +79,31 @@ gcloud builds submit
 
 9. Finally, use terraform to create the cloud function and upload the code that will be the basis of our slackbot:
 
+You will want to create the bot parameters in your slack instance by following the guidance in: https://slack.dev/bolt-python/tutorial/getting-started-http#create-an-app
+
+You will need a signing secret and a bot token to use when deploying this app using terraform.
+
 ```
 cd code
 terraform init
 terraform apply
 ```
-(Note that sometimes enabling the cloudfunctions api takes a bit and may error out the first time you attempt to create the function..retry in a bit.)
 
 Next transfer this terraform state to your cloud repo by editing the backend.tf file in the code dir, setting the project name and:
 
 ```
 terraform init -force-copy
 ```
+
+You will receive a URL of the function that you can use in your slack app configuration by appending /slack/events to the URL. Place this url in the 'event subscriptions' portion of the app config as follows (replace with https://your-url-goes-here/slack/events):
+https://us-central1-prj-sample-slackbot-abcd.cloudfunctions.net/fnct-slackbot-prj-sample-slackbot-abcd/slack/events
+
+Be sure to subscribe to these events:
+- message.channels
+- message.groups
+- message.im
+- message.mpim
+- app_mention
 
 ## Secrets
 According to https://github.com/hashicorp/terraform-provider-google/issues/9946 there is no way to use terraform to reference secrets stored in google secret manager and pass them to the function.
