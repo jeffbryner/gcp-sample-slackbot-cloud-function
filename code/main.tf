@@ -11,7 +11,7 @@ locals {
   project_id           = var.project_id
   function_bucket_name = "bkt-function-${local.project_id}"
   function_name        = "fnct-${var.function_name}-${local.project_id}"
-  services             = ["cloudfunctions.googleapis.com"]
+  services             = ["cloudfunctions.googleapis.com", "secretmanager.googleapis.com"]
 }
 
 
@@ -54,6 +54,78 @@ resource "google_storage_bucket_object" "function_zip" {
   source = "${path.root}/function.zip"
 }
 
+# secrets for the bot function
+resource "google_secret_manager_secret" "slack_bot_token" {
+  secret_id = "slack_bot_token"
+  project   = data.google_project.target.project_id
+
+  labels = {
+    label = "secret-slack-bot-token"
+  }
+
+  replication {
+    user_managed {
+      replicas {
+        location = var.default_region
+      }
+    }
+  }
+  depends_on = [
+    google_project_service.services
+  ]
+}
+
+# value for the slack_bot_token
+resource "google_secret_manager_secret_version" "slack_bot_token" {
+
+  secret      = google_secret_manager_secret.slack_bot_token.id
+  secret_data = var.slack_bot_token
+}
+
+# signing secret
+resource "google_secret_manager_secret" "slack_signing_secret" {
+  secret_id = "slack_signing_secret"
+  project   = data.google_project.target.project_id
+
+  labels = {
+    label = "secret-slack-signing-secret"
+  }
+
+  replication {
+    user_managed {
+      replicas {
+        location = var.default_region
+      }
+    }
+  }
+  depends_on = [
+    google_project_service.services
+  ]
+}
+
+# value for the slack_signing_secret
+resource "google_secret_manager_secret_version" "slack_signing_secret" {
+
+  secret      = google_secret_manager_secret.slack_signing_secret.id
+  secret_data = var.slack_signing_secret
+}
+
+# allow the project service account to access the secrets
+resource "google_secret_manager_secret_iam_member" "slack_bot_token" {
+  project   = google_secret_manager_secret.slack_bot_token.project
+  secret_id = google_secret_manager_secret.slack_bot_token.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member = format("serviceAccount:%s@appspot.gserviceaccount.com", data.google_project.target.project_id
+  )
+}
+resource "google_secret_manager_secret_iam_member" "slack_signing_secret" {
+  project   = google_secret_manager_secret.slack_signing_secret.project
+  secret_id = google_secret_manager_secret.slack_signing_secret.secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member = format("serviceAccount:%s@appspot.gserviceaccount.com", data.google_project.target.project_id
+  )
+}
+
 # create the cloud function
 resource "google_cloudfunctions_function" "project_function" {
   project               = data.google_project.target.project_id
@@ -63,12 +135,16 @@ resource "google_cloudfunctions_function" "project_function" {
   source_archive_bucket = google_storage_bucket.function_bucket.name
   source_archive_object = google_storage_bucket_object.function_zip.name
   timeout               = 60
-  entry_point           = "hello_world"
+  entry_point           = "hello_slackbot"
   trigger_http          = true
   runtime               = "python38"
   region                = var.default_region
+  environment_variables = {
+    SLACK_BOT_TOKEN      = google_secret_manager_secret_version.slack_bot_token.secret_data,
+    SLACK_SIGNING_SECRET = google_secret_manager_secret_version.slack_signing_secret.secret_data
+  }
   depends_on = [
-    google_storage_bucket_object.function_zip,
+    google_storage_bucket_object.function_zip, google_project_service.services
   ]
 }
 
