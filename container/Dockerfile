@@ -18,7 +18,7 @@ ADD install_cloud_sdk.sh /build/
 RUN /build/install_cloud_sdk.sh ${CLOUD_SDK_VERSION}
 RUN rm -rf /build
 # install pipenv
-RUN pip install pipenv
+RUN pip install --ignore-installed distlib pipenv
 #output versions
 RUN terraform version && gcloud version
 RUN which terraform
