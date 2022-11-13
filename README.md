@@ -82,6 +82,11 @@ gcloud builds submit
 You will want to create the bot parameters in your slack instance by following the guidance in: https://slack.dev/bolt-python/tutorial/getting-started-http#create-an-app
 
 You will need a signing secret and a bot token to use when deploying this app using terraform.
+Bot token is created via the oauth & permissions section and begins with an prefix of xoxb
+Signing secret is available via the 'basic informaiton' page of the app. 
+You will be asked for these values when you run terraform apply which will store them in google secret manager.
+
+Be sure to rename the terraform.tfvars.example file as terraform.tfvars with an accurate project name, funciton name and then run:
 
 ```
 cd code
@@ -89,7 +94,7 @@ terraform init
 terraform apply
 ```
 
-Next transfer this terraform state to your cloud repo by editing the backend.tf file in the code dir, setting the project name and:
+Next transfer this terraform state to your cloud repo by copying the backend.tf file into code dir and:
 
 ```
 terraform init -force-copy
