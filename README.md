@@ -99,16 +99,27 @@ Next transfer this terraform state to your cloud repo by copying the backend.tf 
 ```
 terraform init -force-copy
 ```
+  
+## App configuration
 
-You will receive a URL of the function that you can use in your slack app configuration by appending /slack/events to the URL. Place this url in the 'event subscriptions' portion of the app config as follows (replace with https://your-url-goes-here/slack/events):
-https://us-central1-prj-sample-slackbot-abcd.cloudfunctions.net/fnct-slackbot-prj-sample-slackbot-abcd/slack/events
-
-Be sure to subscribe to these events:
+You will receive a URL of the function that you can use in your slack app configuration. Place this url in the 'event subscriptions' portion of the app config and it will verify that the authentication works. The url should look something like: 
+https://fnct-some-name-prj-some-name-a1e0-random74a-uc.a.run.app
+  
+** If the URL verification fails, be sure you have referenced the SIGNING secret (and not the client secret) in your config, and be sure you've included the slackbot token from the 'oauth & permissions' section (it starts with xoxb-).
+  
+Be sure to subscribe to these events in the bot section:
 - message.channels
 - message.groups
 - message.im
 - message.mpim
 - app_mention
+  
+Be sure to also include the same URL in the 'interactivity and shortcuts' section of the app configuration page so the button click works. 
+
+## Testing
+Once your bot is deployed and configured, you should be able to mention it in any channel and it will reply with "Hi from Google Cloud Functions!". If you say the word 'hello' in a channel where the bot resides it should reply with "your name, you my friend get a button!". If you click the button it'll say "your name clicked the button". 
+  
+  
 
 ## Secrets
 According to https://github.com/hashicorp/terraform-provider-google/issues/9946 there is no way to use terraform to reference secrets stored in google secret manager and pass them to the function.
