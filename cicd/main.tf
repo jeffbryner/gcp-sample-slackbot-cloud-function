@@ -36,7 +36,7 @@ locals {
   project_name      = format("%s-%s", var.project_prefix, var.project_name)
   project_id        = format("%s-%s-%s", var.project_prefix, var.project_name, random_id.suffix.hex)
   state_bucket_name = format("bkt-%s-%s", "tfstate", local.project_id)
-  repo_name         = format("cicd-%s", local.project_name)
+  repo_name         = format("src-%s", local.project_name)
   is_organization   = var.parent_folder == "" ? true : false
   parent_id         = var.parent_folder == "" ? var.org_id : split("/", var.parent_folder)[1]
   project_org_id    = var.folder_id != "" ? null : var.org_id
